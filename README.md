@@ -3,20 +3,13 @@
 
 ---
 
-## 📋 Abstract
+## Abstract
 
-Before you can extract insight from data, you need to understand
-what you're working with.
+Before you can extract insight from data, you need to understand what you're actually working with.
 
-This project is the foundation of a two-part SQL analytics series
-built on a real-world e-commerce dataset. Using a structured,
-systematic approach to Exploratory Data Analysis, it investigates
-the database architecture, dimensions, time boundaries, and core
-business metrics of an e-commerce operation — laying the groundwork
-for the deeper analytical work that follows in Part 2.
+This is Part 1 of a two-part SQL analytics series on a real-world e-commerce dataset. Before any business questions get answered, the data gets interrogated — its structure, its range, its quirks, its quality issues. What tables exist? What time period does it cover? What are the headline numbers? Only after answering those questions does it make sense to push into deeper analysis.
 
-The goal here is simple but critical: know your data before you
-draw conclusions from it.
+That's the whole point of EDA. Know your data before you draw conclusions from it.
 
 ---
 
@@ -24,48 +17,31 @@ draw conclusions from it.
 
 ### 1.1 Background
 
-In any data analytics project, the quality of your conclusions
-depends entirely on how well you understand your data. Jumping
-straight into advanced analysis without first exploring the
-dataset — its structure, its range, its quirks — is one of the
-most common mistakes analysts make.
+Jumping straight into advanced analysis without first exploring the dataset is one of the most common mistakes analysts make. You end up building conclusions on assumptions you never actually verified — and that's where things quietly go wrong.
 
-This project takes the opposite approach.
-
-Before any business question gets answered, the data gets
-interrogated. What tables exist? What are their relationships?
-What time period does the data cover? What are the key business
-metrics at a high level? Only after answering these questions
-can meaningful analysis begin.
+This project takes the opposite approach. Every table gets inspected. Every dimension gets counted. Every data quality issue gets flagged. It's not the flashiest work, but it's the work that makes everything else trustworthy.
 
 ### 1.2 Problem Statement
 
-Working with an e-commerce dataset containing customer, product,
-and sales records, the core challenge is establishing a reliable
-analytical foundation by answering:
+Working with an e-commerce dataset containing customer, product, and sales records, the goal is to build a reliable analytical foundation by answering six core questions:
 
-- What is the structure and schema of the database?
-- What are the unique dimensions — countries, categories,
-  products — that define this business?
-- What time period does the data cover, and what is the
-  demographic range of the customer base?
-- What are the headline business metrics — total sales, orders,
-  customers, and products?
-- How does performance distribute across countries, genders,
-  and product categories?
-- Which products and customers are the top and bottom performers?
+- What's the structure and schema of the database?
+- What are the unique dimensions — countries, categories, products — that define this business?
+- What time period does the data cover, and what's the demographic range of the customer base?
+- What are the headline business metrics at a high level?
+- How does performance distribute across countries, genders, and product categories?
+- Who and what are the top and bottom performers?
 
 ### 1.3 Research Objectives
 
-This analysis is organized around six progressive exploration
-questions:
+Six progressive exploration steps:
 
-1. What does the database structure look like?
-2. What are the unique dimensions of the business?
-3. What is the temporal and demographic boundary of the data?
-4. What are the key business metrics at a glance?
-5. How do metrics distribute across categories and geographies?
-6. Who and what are the top and bottom performers?
+1. Understand the database structure.
+2. Map out the unique dimensions of the business.
+3. Establish the temporal and demographic boundaries of the data.
+4. Calculate the key business metrics.
+5. Understand how those metrics distribute across categories and geographies.
+6. Identify top and bottom performers by revenue and orders.
 
 ---
 
@@ -73,8 +49,7 @@ questions:
 
 ### 2.1 Dataset
 
-The dataset follows a **Gold Layer architecture** — pre-cleaned,
-business-ready tables optimized for analysis:
+The dataset follows a **Gold Layer architecture** — pre-cleaned, business-ready tables built for analysis:
 
 | File | Description |
 |---|---|
@@ -82,11 +57,7 @@ business-ready tables optimized for analysis:
 | `gold.dim_products.csv` | Product catalog — categories, subcategories, costs |
 | `gold.fact_sales.csv` | Sales transactions — orders, quantities, revenue |
 
-> The Gold Layer naming convention signals that these tables have
-> already passed through data cleaning and transformation stages —
-> making them reliable and analysis-ready. However, as this EDA
-> reveals, even Gold Layer data can contain quality issues worth
-> flagging and documenting.
+> Gold Layer means these tables have already been through cleaning and transformation. They're analysis-ready — but as this EDA shows, even clean data can hide issues worth flagging.
 
 ### 2.2 Analytical Approach
 
@@ -127,9 +98,7 @@ business-ready tables optimized for analysis:
 ### 3.1 Database Exploration
 📄 *Script: `01_database_exploration.sql`*
 
-The first step was understanding what the database contains —
-inspecting all available tables and their column structures
-using system metadata views.
+First thing — understand what the database actually contains. That means inspecting all available tables and their column structures using system metadata views before writing a single analytical query.
 
 ```sql
 -- Database Tables
@@ -150,27 +119,21 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_NAME = 'dim_customers';
 ```
 
-#### Result:
-![Database Exploration Result](/images/01_database_exploration_result.PNG)
+**Result:**
+![Database Exploration Result](images/01_database_exploration_result.PNG)
 
-**What this revealed:**
-The database contains **4 objects** in the `gold` schema —
-three core tables (`dim_customers`, `dim_products`,
-`fact_sales`) and one VIEW (`report_products`), confirming
-a clean dimensional model architecture. The `dim_customers`
-table structure reveals key fields including `customer_key`,
-`customer_id`, `customer_number`, `first_name`, `last_name`,
-and `country` — all essential dimensions for customer-level
-analysis.
+**Findings:**
+
+The database has **4 objects** in the `gold` schema — three core tables (`dim_customers`, `dim_products`, `fact_sales`) and one VIEW (`report_products`). Clean dimensional model, no surprises there.
+
+The `dim_customers` structure confirms the key fields we need: `customer_key`, `customer_id`, `customer_number`, `first_name`, `last_name`, `country` — all the dimensions that matter for customer-level analysis.
 
 ---
 
 ### 3.2 Dimensions Exploration
 📄 *Script: `02_dimensions_exploration.sql`*
 
-With the structure confirmed, the next step was understanding
-the unique values within key dimensions — the building blocks
-of any segmentation or filtering analysis.
+With the structure confirmed, the next step is understanding what unique values actually exist across the key dimensions — the building blocks of any segmentation or filtering work downstream.
 
 ```sql
 -- Unique Countries
@@ -187,40 +150,28 @@ FROM gold.dim_products
 ORDER BY category, subcategory, product_name;
 ```
 
-#### Result:
-![Dimensions Exploration Result](/images/02_dimensions_exploration_result.PNG)
+**Result:**
+![Dimensions Exploration Result](images/02_dimensions_exploration_result.PNG)
 
-**What this revealed:**
-The customer base spans **7 geographic entries** — Australia,
-Canada, France, Germany, United Kingdom, and United States —
-with one entry recorded as `n/a`, flagged for data quality
-review.
+**Findings:**
 
-> ⚠️ **Data Quality Observation:** The `category` and
-> `subcategory` columns returned **NULL values** for a
-> subset of product entries. Upon investigation, this appears
-> to be either incomplete data entry at the source or products
-> that were not yet assigned to a category at the time of
-> recording. This was documented and flagged for cleaning
-> before any product category-level analysis is conducted.
-> This is a normal and expected finding in real-world datasets
-> — and identifying it early is precisely the purpose of EDA.
+The customer base spans **7 geographic entries** — Australia, Canada, France, Germany, United Kingdom, and United States — plus one entry recorded as `n/a`, which got flagged immediately for data quality review.
+
+> ⚠️ **Data Quality Flag:** The `category` and `subcategory` columns returned **NULL values** for a subset of product entries. This is either incomplete data entry at the source or products that weren't assigned to a category yet. Either way, it's documented and needs to be resolved before any product category-level analysis runs. Finding this early is exactly what EDA is for.
 
 ---
 
 ### 3.3 Date Range Exploration
 📄 *Script: `03_date_range_exploration.sql`*
 
-Understanding the temporal boundaries of the data is essential
-before any trend or time-series analysis can be trusted.
+Before any trend or time-series analysis, you need to know exactly what time window you're working with — and whether the customer demographic data makes sense.
 
 ```sql
 -- First and Last Order Date
 SELECT
     MIN(order_date) AS first_order_date,
     MAX(order_date) AS last_order_date,
-    DATEDIFF(MONTH, MIN(order_date), MAX(order_date))
-        AS order_range_months
+    DATEDIFF(MONTH, MIN(order_date), MAX(order_date)) AS order_range_months
 FROM gold.fact_sales;
 
 -- Youngest and Oldest Customer
@@ -233,31 +184,22 @@ FROM gold.dim_customers;
 ```
 
 **Result:**
-![Date Range Exploration Result](/images/03_date_range_result.PNG)
+![Date Range Exploration Result](images/03_date_range_result.PNG)
 
-**What this revealed:**
-The dataset covers **37 months of transaction history**,
-spanning from **December 29, 2010** to **January 28, 2014**
-— a solid analytical window for trend and seasonality analysis.
+**Findings:**
 
-The customer age analysis reveals a range from **40 years
-old** (youngest, born June 25, 1986) to **110 years old**
-(oldest, born February 10, 1916).
+The dataset covers **37 months of transaction history**, from **December 29, 2010** to **January 28, 2014** — a solid window for trend and seasonality work.
 
-> ⚠️ **Data Quality Observation:** The oldest customer age
-> of **110 years** is a likely data entry anomaly. A birthdate
-> of 1916 in an active e-commerce customer dataset warrants
-> investigation — this record should be reviewed and either
-> corrected or excluded from any age-based demographic analysis.
+Customer ages range from **40** (youngest, born June 25, 1986) to **110** (oldest, born February 10, 1916).
+
+> ⚠️ **Data Quality Flag:** A 110-year-old active e-commerce customer is almost certainly a data entry error. That 1916 birthdate needs to be reviewed and either corrected or excluded from any age-based demographic analysis. Easy to miss if you don't run this check upfront.
 
 ---
 
 ### 3.4 Measures Exploration — Key Business Metrics
 📄 *Script: `04_measures_exploration.sql`*
 
-With the structure and boundaries understood, the headline
-business metrics were calculated to establish a single source
-of truth for the e-commerce operation's overall performance.
+With structure and boundaries understood, time to calculate the headline numbers — a single consolidated view of the entire business's performance.
 
 ```sql
 SELECT 'Total Sales' AS measure_name,
@@ -277,11 +219,10 @@ SELECT 'Total Customers',
     COUNT(customer_key) FROM gold.dim_customers;
 ```
 
-#### Result:
-![Key Business Metrics Result](/images/04_measures_result.PNG)
+**Result:**
+![Key Business Metrics Result](images/04_measures_result.PNG)
 
-**What this revealed:**
-A single consolidated view of the entire business:
+**Findings:**
 
 | Metric | Value |
 |---|---|
@@ -292,19 +233,14 @@ A single consolidated view of the entire business:
 | Total Products | **295** |
 | Total Customers | **18,484** |
 
-These headline numbers serve as the baseline benchmark
-against which all deeper analysis is measured — any
-segment, category, or ranking finding must be interpreted
-relative to these totals.
+These are the baselines. Every segment, category, or ranking finding in the rest of the analysis gets interpreted relative to these numbers.
 
 ---
 
 ### 3.5 Magnitude Analysis
 📄 *Script: `05_magnitude_analysis.sql`*
 
-With headline metrics established, the analysis shifted to
-understanding how performance distributes across key
-dimensions — countries, genders, and product categories.
+With headline metrics set, the next question is how performance actually distributes across the key dimensions — countries, genders, and product categories.
 
 ```sql
 SELECT
@@ -317,39 +253,29 @@ GROUP BY p.category
 ORDER BY total_revenue DESC;
 ```
 
-#### Result:
-![Magnitude Analysis Result](/images/05_magnitude_result.PNG)
+**Result:**
+![Magnitude Analysis Result](images/05_magnitude_result.PNG)
 
-**What this revealed:**
-The revenue distribution across product categories is
-dramatically skewed:
+**Findings:**
+
+The revenue split by category is pretty stark:
 
 | Category | Total Revenue |
 |---|---|
 | Bikes | **$28,316,272** |
-| Clothing | **$339,716** |
 | Accessories | **$700,262** |
+| Clothing | **$339,716** |
 
-**Bikes account for approximately 97% of all revenue** —
-an extraordinary concentration that has major implications
-for inventory strategy, marketing investment, and business
-risk management.
+Bikes are carrying roughly **97% of all revenue**. That's not a dominant category — that's the entire business, with everything else as a rounding error. It has real implications for inventory strategy, marketing spend, and risk exposure.
 
-The top customers by revenue are tightly clustered —
-the highest spender (**Nichole Nara, $13,294**) is
-separated from the 7th-ranked customer by less than
-$100 — suggesting a relatively even distribution among
-top buyers rather than a single dominant customer.
+On the customer side, the top spenders are tightly clustered — the highest spender (**Nichole Nara, $13,294**) is separated from the 7th-ranked customer by less than $100. No single dominant customer; fairly even distribution among the top buyers.
 
 ---
 
 ### 3.6 Ranking Analysis
 📄 *Script: `06_ranking_analysis.sql`*
 
-The final exploration layer identified the specific products
-at the top and bottom of performance — using both simple
-`TOP` queries and advanced Window Functions for flexible,
-reusable ranking logic.
+The final layer — identifying the specific products at the top and bottom of performance, using both simple `TOP` queries and window functions for more flexible, reusable ranking logic.
 
 ```sql
 -- Top 5 Products by Revenue
@@ -357,8 +283,7 @@ SELECT * FROM (
     SELECT
         p.product_name,
         SUM(f.sales_amount) AS total_revenue,
-        RANK() OVER (ORDER BY SUM(f.sales_amount) DESC)
-            AS rank_products
+        RANK() OVER (ORDER BY SUM(f.sales_amount) DESC) AS rank_products
     FROM gold.fact_sales f
     LEFT JOIN gold.dim_products p
         ON p.product_key = f.product_key
@@ -378,9 +303,9 @@ ORDER BY total_revenue;
 ```
 
 **Result:**
-![Ranking Analysis Result](/images/06_ranking_result.PNG)
+![Ranking Analysis Result](images/06_ranking_result.PNG)
 
-**What this revealed:**
+**Findings:**
 
 **Top 5 Products by Revenue:**
 
@@ -402,105 +327,63 @@ ORDER BY total_revenue;
 | Bike Wash-Dissolv... | **$7,272** |
 | Touring Tire Tube | **$7,440** |
 
-The top 5 products are **all Mountain-200 variants** —
-confirming that a single product line drives an outsized
-share of revenue. The bottom 5 are all low-cost accessories,
-generating less than $7,500 each across the entire
-37-month dataset.
+All five top products are Mountain-200 variants. Every single one. That's not a coincidence — that's a product line carrying the business. The bottom five are all low-cost accessories that combined didn't crack $30K across 37 months of sales.
 
 ---
 
 ## Section 4 — Key Findings
 
-- The database contains **4 objects** in the Gold schema —
-  3 tables and 1 VIEW — organized in a clean dimensional
-  model architecture
-- The customer base spans **6 countries** plus one
-  unclassified `n/a` entry flagged for data quality review
-- **Data quality issues were identified** — NULL category
-  values in the products dimension and a likely erroneous
-  customer birthdate of 1916 — both documented and flagged
-  for remediation
-- The dataset covers **37 months** of transaction history
-  from December 2010 to January 2014
-- Total revenue across the period reached **$29,356,250**
-  across **27,659 orders** from **18,484 customers**
-- **Bikes account for ~97% of all revenue ($28.3M)** —
-  an extraordinary concentration that defines the business's
-  commercial profile
-- The **Mountain-200 product line dominates** top performance,
-  with all 5 highest-revenue products belonging to this
-  single product family
-- Bottom performers are exclusively **low-cost accessories**
-  generating under $7,500 each across the full 37 months
+- The database has **4 objects** in the Gold schema — 3 tables and 1 VIEW — in a clean dimensional model architecture.
+- The customer base covers **6 countries** plus one unclassified `n/a` entry flagged for review.
+- **Two data quality issues surfaced** — NULL category values in the products dimension and a likely erroneous 1916 birthdate — both documented and flagged before any downstream analysis.
+- The dataset spans **37 months** of transactions, from December 2010 to January 2014.
+- Total revenue hit **$29,356,250** across **27,659 orders** from **18,484 customers**.
+- **Bikes account for ~97% of all revenue ($28.3M)** — the business essentially runs on one category.
+- **The Mountain-200 product line owns the top 5 revenue spots** — all five highest-revenue products are Mountain-200 variants.
+- Bottom performers are all **low-cost accessories** generating under $7,500 each over the full 37 months.
 
 ---
 
 ## Section 5 — Recommendations
 
-**1. Investigate and Resolve Data Quality Issues**
-Two data quality flags were raised during this EDA — NULL
-product categories and a likely erroneous customer birthdate.
-These should be investigated at the source system level
-before any production reporting is built on this dataset.
-Clean data is the foundation of trustworthy analysis.
+**1. Fix the Data Quality Issues Before Going Further**
 
-**2. Reduce Concentration Risk in the Bike Category**
-With 97% of revenue coming from Bikes, this business is
-heavily exposed to any disruption in that category —
-supply chain issues, demand shifts, or competitive pressure
-could be catastrophic. A deliberate strategy to grow
-Accessories and Clothing revenue would reduce this risk.
+Two flags came out of this EDA — NULL product categories and a 1916 birthdate. These need to be investigated at the source before any production reporting gets built on this dataset. Garbage in, garbage out — and it's much easier to fix now than after dashboards are live.
 
-**3. Invest Heavily in the Mountain-200 Product Line**
-The top 5 revenue-generating products are all Mountain-200
-variants. This product line deserves priority treatment —
-in stock levels, in marketing, and in supplier negotiations.
-Running out of Mountain-200 stock is not an inventory
-problem, it's a revenue problem.
+**2. Take the Bike Concentration Seriously**
 
-**4. Review and Discontinue Bottom-Performing Accessories**
-Products generating under $7,500 over 37 months —
-like Racing Socks and Patch Kits — are consuming catalog
-space and operational overhead for minimal return. Each
-should be evaluated for discontinuation, repricing,
-or bundling with higher-value products.
+97% of revenue in one category is a risk, not just a fun fact. Supply chain disruption, a demand shift, or a strong competitor in the bike space hits the entire business almost immediately. Growing Accessories and Clothing — even modestly — would reduce that exposure.
 
-**5. Investigate the n/a Customer Country Entry**
-A customer country recorded as `n/a` is a data integrity
-issue. Understanding whether this represents a specific
-geographic region, a system default, or a data entry
-error will determine whether these customers can be
-properly segmented in future geographic analysis.
+**3. Protect and Invest in the Mountain-200 Line**
+
+The top 5 revenue products are all Mountain-200 variants. This product line deserves priority treatment in stock levels, marketing, and supplier relationships. Running out of Mountain-200 inventory isn't an operations problem — it's a revenue problem.
+
+**4. Review the Bottom-Performing Accessories**
+
+Products generating under $7,500 over 37 months are barely worth the catalog space. Racing Socks, Patch Kits — each one needs a real decision: discontinue, reprice, or bundle with something higher-value. Keeping them around by default isn't a strategy.
+
+**5. Resolve the n/a Country Entry**
+
+Whether it's a system default, a specific region, or just bad data entry — an `n/a` country record needs to be understood before customers can be properly segmented in geographic analysis.
 
 ---
 
 ## Section 6 — Conclusion
 
-Good analysis starts with good questions. And good questions
-start with understanding your data.
+Good analysis starts with good questions. And good questions start with actually understanding your data.
 
-This project deliberately slows down before speeding up —
-taking the time to inspect the database structure, understand
-the dimensions, establish the time boundaries, and calculate
-the headline metrics before drawing any conclusions.
+This project deliberately slows down before speeding up — inspecting the structure, mapping the dimensions, checking the time boundaries, and verifying the headline numbers before drawing any conclusions.
 
-What emerged was more than just numbers. The EDA surfaced
-two data quality issues that would have silently corrupted
-downstream analysis if left undetected. It revealed a
-business almost entirely dependent on a single product
-category and a single product line. And it established
-the baseline metrics — $29.4M in revenue, 27,659 orders,
-18,484 customers — against which all future performance
-will be measured.
+What came out of it was more than just a set of metrics. Two data quality issues got caught that would have silently corrupted downstream analysis. A business almost entirely dependent on one product category and one product line got surfaced early. And the baseline numbers — $29.4M in revenue, 27,659 orders, 18,484 customers — got locked in as the reference point for everything that follows.
 
-This is what EDA is for. Not just to describe the data —
-but to understand it well enough to trust it.
+That's what EDA is actually for. Not just describing the data — understanding it well enough to trust it.
 
 ---
 
 ## 📁 Project Structure
-EDA_SQL_Project/
+
+```
+E-Commerce-Sales-EDA-Database-And-Business-Metrics-Exploration-Using-SQL/
 ├── datasets/
 │   ├── gold.dim_customers.csv
 │   ├── gold.dim_products.csv
@@ -514,8 +397,6 @@ EDA_SQL_Project/
 │   └── 06_ranking_analysis.sql
 ├── images/
 └── README.md
+```
 
-> 🔗 This is **Part 1** of a two-part SQL analytics series.
-> For advanced analytics including segmentation, performance
-> analysis, and business reporting, see
-> [Part 2 — Advanced Sales Analytics](../Advanced_SQL_Analytics./)
+> 🔗 This is **Part 1** of a two-part SQL analytics series. For advanced analytics including segmentation, performance analysis, and business reporting, see [Part 2 — Advanced Sales Analytics](https://github.com/DanielSampson/Advanced_SQL_Analytics)
